@@ -550,30 +550,151 @@ class Tracer:
         return Tracer._trace_numpy_operation(np.right_shift, self.sanitize(other), self)
 
     def __gt__(self, other: Any) -> "Tracer":  # type: ignore
-        return Tracer._trace_numpy_operation(np.greater, self, self.sanitize(other))
+        max_bit_width = max(self.computation.output.dtype.bit_width,
+                        self.sanitize(other).computation.output.dtype.bit_width)
+
+        if self.computation.output.is_clear or self.sanitize(other).computation.output.is_clear:
+            return Tracer._trace_numpy_operation(np.less, self, self.sanitize(other))
+        if max_bit_width <=15:
+            subtract = Tracer._trace_numpy_operation(np.subtract,self,self.sanitize(other))
+            return Tracer._trace_numpy_operation(np.less, subtract, self.sanitize(0))
+
+        max_bit_width_tracer = self.sanitize(max_bit_width-1)
+        max_value_tracer = self.sanitize(2**(max_bit_width-1) -1)
+        b1 = Tracer._trace_numpy_operation(np.right_shift,self,max_bit_width_tracer)
+        b2 = Tracer._trace_numpy_operation(np.right_shift,self.sanitize(other),max_bit_width_tracer)
+        r1 = Tracer._trace_numpy_operation(np.bitwise_and,self,max_value_tracer)
+        r2 = Tracer._trace_numpy_operation(np.bitwise_and,self.sanitize(other),max_value_tracer)
+        subtract = Tracer._trace_numpy_operation(np.subtract,r1,r2)
+        weak_bits_comparison = Tracer._trace_numpy_operation(np.greater,subtract,self.sanitize(0))
+
+        strong_bit_comparison = Tracer._trace_numpy_operation(np.add,b1,Tracer._trace_numpy_operation(np.subtract,self.sanitize(1),b2))
+
+        result = Tracer._trace_numpy_operation(np.add,weak_bits_comparison,strong_bit_comparison)
+        return Tracer._trace_numpy_operation(np.greater_equal,result,self.sanitize(2))
 
     def __ge__(self, other: Any) -> "Tracer":  # type: ignore
-        return Tracer._trace_numpy_operation(np.greater_equal, self, self.sanitize(other))
+        max_bit_width = max(self.computation.output.dtype.bit_width,
+                        self.sanitize(other).computation.output.dtype.bit_width)
+
+        if self.computation.output.is_clear or self.sanitize(other).computation.output.is_clear:
+            return Tracer._trace_numpy_operation(np.greater_equal, self, self.sanitize(other))
+        if max_bit_width <=15:
+            subtract = Tracer._trace_numpy_operation(np.subtract,self,self.sanitize(other))
+            return Tracer._trace_numpy_operation(np.greater_equal, subtract, self.sanitize(0))
+
+        max_bit_width_tracer = self.sanitize(max_bit_width-1)
+        max_value_tracer = self.sanitize(2**(max_bit_width-1) -1)
+        b1 = Tracer._trace_numpy_operation(np.right_shift,self,max_bit_width_tracer)
+        b2 = Tracer._trace_numpy_operation(np.right_shift,self.sanitize(other),max_bit_width_tracer)
+        r1 = Tracer._trace_numpy_operation(np.bitwise_and,self,max_value_tracer)
+        r2 = Tracer._trace_numpy_operation(np.bitwise_and,self.sanitize(other),max_value_tracer)
+        subtract = Tracer._trace_numpy_operation(np.subtract,r1,r2)
+        weak_bits_comparison = Tracer._trace_numpy_operation(np.greater_equal,subtract,self.sanitize(0))
+
+        strong_bit_comparison = Tracer._trace_numpy_operation(np.add,b1,Tracer._trace_numpy_operation(np.subtract,self.sanitize(1),b2))
+
+        result = Tracer._trace_numpy_operation(np.add,weak_bits_comparison,strong_bit_comparison)
+        return Tracer._trace_numpy_operation(np.greater_equal,result,self.sanitize(2))
 
     def __lt__(self, other: Any) -> "Tracer":  # type: ignore
-        return Tracer._trace_numpy_operation(np.less, self, self.sanitize(other))
+        max_bit_width = max(self.computation.output.dtype.bit_width,
+                        self.sanitize(other).computation.output.dtype.bit_width)
+
+        if self.computation.output.is_clear or self.sanitize(other).computation.output.is_clear:
+            return Tracer._trace_numpy_operation(np.less, self, self.sanitize(other))
+        if max_bit_width <=15:
+            subtract = Tracer._trace_numpy_operation(np.subtract,self,self.sanitize(other))
+            return Tracer._trace_numpy_operation(np.less, subtract, self.sanitize(0))
+
+        max_bit_width_tracer = self.sanitize(max_bit_width-1)
+        max_value_tracer = self.sanitize(2**(max_bit_width-1) -1)
+        b1 = Tracer._trace_numpy_operation(np.right_shift,self,max_bit_width_tracer)
+        b2 = Tracer._trace_numpy_operation(np.right_shift,self.sanitize(other),max_bit_width_tracer)
+        r1 = Tracer._trace_numpy_operation(np.bitwise_and,self,max_value_tracer)
+        r2 = Tracer._trace_numpy_operation(np.bitwise_and,self.sanitize(other),max_value_tracer)
+        subtract = Tracer._trace_numpy_operation(np.subtract,r1,r2)
+        weak_bits_comparison = Tracer._trace_numpy_operation(np.less,subtract,self.sanitize(0))
+
+        strong_bit_comparison = Tracer._trace_numpy_operation(np.add,b2,Tracer._trace_numpy_operation(np.subtract,self.sanitize(1),b1))
+
+        result = Tracer._trace_numpy_operation(np.add,weak_bits_comparison,strong_bit_comparison)
+        return Tracer._trace_numpy_operation(np.greater_equal,result,self.sanitize(2))
+
 
     def __le__(self, other: Any) -> "Tracer":  # type: ignore
-        return Tracer._trace_numpy_operation(np.less_equal, self, self.sanitize(other))
+        max_bit_width = max(self.computation.output.dtype.bit_width,
+                        self.sanitize(other).computation.output.dtype.bit_width)
+
+        if self.computation.output.is_clear or self.sanitize(other).computation.output.is_clear:
+            return Tracer._trace_numpy_operation(np.less_equal, self, self.sanitize(other))
+        if max_bit_width <=15:
+            subtract = Tracer._trace_numpy_operation(np.subtract,self,self.sanitize(other))
+            return Tracer._trace_numpy_operation(np.less_equal, subtract, self.sanitize(0))
+
+        max_bit_width_tracer = self.sanitize(max_bit_width-1)
+        max_value_tracer = self.sanitize(2**(max_bit_width-1) -1)
+        b1 = Tracer._trace_numpy_operation(np.right_shift,self,max_bit_width_tracer)
+        b2 = Tracer._trace_numpy_operation(np.right_shift,self.sanitize(other),max_bit_width_tracer)
+        r1 = Tracer._trace_numpy_operation(np.bitwise_and,self,max_value_tracer)
+        r2 = Tracer._trace_numpy_operation(np.bitwise_and,self.sanitize(other),max_value_tracer)
+        subtract = Tracer._trace_numpy_operation(np.subtract,r1,r2)
+        weak_bits_comparison = Tracer._trace_numpy_operation(np.less_equal,subtract,self.sanitize(0))
+
+        strong_bit_comparison = Tracer._trace_numpy_operation(np.add,b2,Tracer._trace_numpy_operation(np.subtract,self.sanitize(1),b1))
+
+        result = Tracer._trace_numpy_operation(np.add,weak_bits_comparison,strong_bit_comparison)
+        return Tracer._trace_numpy_operation(np.greater_equal,result,self.sanitize(2))  
 
     def __eq__(self, other: Any) -> Union[bool, "Tracer"]:  # type: ignore
-        return (
-            self is other
-            if not self._is_tracing
-            else Tracer._trace_numpy_operation(np.equal, self, self.sanitize(other))
-        )
+        if not self._is_tracing:
+            return self is other
+        else:
+            max_bit_width = max(self.output.dtype.bit_width,
+                        self.sanitize(other).computation.output.dtype.bit_width)
+            if self.computation.output.is_clear or self.sanitize(other).computation.output.is_clear:
+                return Tracer._trace_numpy_operation(np.equal, self, self.sanitize(other))
+            if max_bit_width <=15:
+                subtract = Tracer._trace_numpy_operation(np.subtract,self,self.sanitize(other))
+                return Tracer._trace_numpy_operation(np.equal, subtract, self.sanitize(0))
 
+            max_bit_width_tracer = self.sanitize(max_bit_width-1)
+            max_value_tracer = self.sanitize(2**(max_bit_width-1) -1)
+            zero = self.sanitize(0)
+            b1 = Tracer._trace_numpy_operation(np.right_shift,self,max_bit_width_tracer)
+            b2 = Tracer._trace_numpy_operation(np.right_shift,self.sanitize(other),max_bit_width_tracer)
+            r1 = Tracer._trace_numpy_operation(np.bitwise_and,self,max_value_tracer)
+            r2 = Tracer._trace_numpy_operation(np.bitwise_and,self.sanitize(other),max_value_tracer)
+            subtract = Tracer._trace_numpy_operation(np.subtract,r1,r2)
+            weak_bits_comparison = Tracer._trace_numpy_operation(np.equal,subtract,zero)
+
+            strong_bit_comparison = Tracer._trace_numpy_operation(np.equal,Tracer._trace_numpy_operation(np.subtract,b1,b2),zero)
+            return Tracer._trace_numpy_operation(np.equal,Tracer._trace_numpy_operation(np.add,weak_bits_comparison,strong_bit_comparison),self.sanitize(2)) 
+        
     def __ne__(self, other: Any) -> Union[bool, "Tracer"]:  # type: ignore
-        return (
-            self is not other
-            if not self._is_tracing
-            else Tracer._trace_numpy_operation(np.not_equal, self, self.sanitize(other))
-        )
+        if not self._is_tracing:
+            return self is not other
+        else:
+            max_bit_width = max(self.computation.output.dtype.bit_width,
+                        self.sanitize(other).computation.output.dtype.bit_width)
+            if self.computation.output.is_clear or self.sanitize(other).computation.output.is_clear:
+                return Tracer._trace_numpy_operation(np.not_equal, self, self.sanitize(other))
+            if max_bit_width <=15:
+                subtract = Tracer._trace_numpy_operation(np.subtract,self,self.sanitize(other))
+                return Tracer._trace_numpy_operation(np.not_equal, subtract, self.sanitize(0))
+
+            max_bit_width_tracer = self.sanitize(max_bit_width-1)
+            max_value_tracer = self.sanitize(2**(max_bit_width-1) -1)
+            zero = self.sanitize(0)
+            b1 = Tracer._trace_numpy_operation(np.right_shift,self,max_bit_width_tracer)
+            b2 = Tracer._trace_numpy_operation(np.right_shift,self.sanitize(other),max_bit_width_tracer)
+            r1 = Tracer._trace_numpy_operation(np.bitwise_and,self,max_value_tracer)
+            r2 = Tracer._trace_numpy_operation(np.bitwise_and,self.sanitize(other),max_value_tracer)
+            subtract = Tracer._trace_numpy_operation(np.subtract,r1,r2)
+            weak_bits_comparison = Tracer._trace_numpy_operation(np.not_equal,subtract,zero)
+
+            strong_bit_comparison = Tracer._trace_numpy_operation(np.not_equal,Tracer._trace_numpy_operation(np.subtract,b1,b2),zero)
+            return Tracer._trace_numpy_operation(np.not_equal,Tracer._trace_numpy_operation(np.add,weak_bits_comparison,strong_bit_comparison),self.sanitize(2)) 
 
     def astype(self, dtype: Union[DTypeLike, Type["ScalarAnnotation"]]) -> "Tracer":
         """

@@ -161,12 +161,18 @@ class NodeConverter:
             "conv2d": self._convert_conv2d,
             "conv3d": self._convert_conv3d,
             "dot": self._convert_dot,
+            "equal": self._convert_equal,
             "expand_dims": self._convert_reshape,
+            "greater": self._convert_greater,
+            "greater_equal": self._convert_greater_equal,
             "index.static": self._convert_static_indexing,
+            "less": self._convert_less,
+            "less_equal": self._convert_less_equal,
             "matmul": self._convert_matmul,
             "maxpool": self._convert_maxpool,
             "multiply": self._convert_mul,
             "negative": self._convert_neg,
+            "not_equal": self._convert_not_equal,
             "ones": self._convert_ones,
             "reshape": self._convert_reshape,
             "subtract": self._convert_sub,
@@ -174,7 +180,6 @@ class NodeConverter:
             "transpose": self._convert_transpose,
             "zeros": self._convert_zeros,
         }
-
         if name in converters:
             return converters[name]()
 
@@ -456,6 +461,26 @@ class NodeConverter:
 
         return result
 
+    def _convert_equal(self) -> OpResult:
+
+        return self._convert_tlu()
+
+    def _convert_greater(self) -> OpResult:
+
+        return self._convert_tlu()
+
+    def _convert_greater_equal(self) -> OpResult:
+
+        return self._convert_tlu()
+
+    def _convert_less(self) -> OpResult:
+
+        return self._convert_tlu()
+    
+    def _convert_less_equal(self) -> OpResult:
+
+        return self._convert_tlu()
+
     def _convert_matmul(self) -> OpResult:
         """Convert a MatMul node to its corresponding MLIR representation.
 
@@ -529,6 +554,10 @@ class NodeConverter:
             result = fhe.NegEintOp(resulting_type, pred).result
 
         return result
+    
+    def _convert_not_equal(self) -> OpResult:
+
+        return self._convert_tlu()
 
     def _convert_ones(self) -> OpResult:
         """

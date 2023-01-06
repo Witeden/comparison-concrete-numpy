@@ -115,13 +115,28 @@ class GraphConverter:
                 if inputs[0].is_encrypted and inputs[1].is_encrypted:
                     return "only dot product between encrypted and clear is supported"
 
+            elif name == "equal":
+                assert_that(len(inputs)==2)
+
             elif name == "expand_dims":
                 assert_that(len(inputs) == 1)
+
+            elif name == "greater":
+                assert_that(len(inputs)==2)
+        
+            elif name == "greater_equal":
+                assert_that(len(inputs)==2)    
 
             elif name == "index.static":
                 assert_that(len(inputs) == 1)
                 if not inputs[0].is_encrypted:
                     return "only encrypted indexing supported"
+
+            elif name == "less":
+                assert_that(len(inputs)==2)    
+
+            elif name == "less_equal":
+                assert_that(len(inputs)==2)    
 
             elif name == "matmul":
                 assert_that(len(inputs) == 2)
@@ -142,6 +157,9 @@ class GraphConverter:
                 assert_that(len(inputs) == 1)
                 if not inputs[0].is_encrypted:
                     return "only encrypted negation is supported"
+
+            elif name == "not_equal":
+                assert_that(len(inputs)==2)    
 
             elif name == "ones":
                 assert_that(len(inputs) == 0)
