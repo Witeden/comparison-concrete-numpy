@@ -8,7 +8,7 @@ We can then treat the MSBs first, and then compare the difference $r1 - r2$ (whi
 
 # Inequality comparisons
 Let us take the case of $x \leq y$ (other inequelaties will work in a similar way).
-$x \leq y$ is equivalent to $(b1 \le b2) or [(b1==b2) and (r1 \leq r2)]$. The trick is to compute this expression as $b2 + (1-b1) + (r1 \leq r2)$, which takes values 2 or 3 when $x \leq y$ and 0 or 1 otherwise. Hence, the comparison itself only needs 2 LUT: one for $r1 \leq r2$ and one to check if the final expression is greater than 1.
+$x \leq y$ is equivalent to $(b1 < b2) OR [(b1==b2) AND (r1 \leq r2)]$. The trick is to compute this expression as $b2 + (1-b1) + (r1 \leq r2)$, which takes values 2 or 3 when $x \leq y$ and 0 or 1 otherwise. Hence, the comparison itself only needs 2 LUT: one for $r1 \leq r2$ and one to check if the final expression is greater than 1.
 
 # Equality comparisons
 As opposed to inequality comparisons, I did not find a suitable expression to avoid one more LUT. Here, I have to compare `b1` and `b2`. Then, I evaluate $(b1==b2) + (r1==r2)$ and check whether it is equalt to 2 or not.
