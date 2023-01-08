@@ -557,7 +557,7 @@ class Tracer:
             return Tracer._trace_numpy_operation(np.less, self, self.sanitize(other))
         if max_bit_width <=15:
             subtract = Tracer._trace_numpy_operation(np.subtract,self,self.sanitize(other))
-            return Tracer._trace_numpy_operation(np.less, subtract, self.sanitize(0))
+            return Tracer._trace_numpy_operation(np.greater, subtract, self.sanitize(0))
 
         max_bit_width_tracer = self.sanitize(max_bit_width-1)
         max_value_tracer = self.sanitize(2**(max_bit_width-1) -1)
